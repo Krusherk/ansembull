@@ -1,0 +1,210 @@
+.leaderboard-screen {
+  z-index: 300;
+  padding: var(--space-md);
+}
+
+.leaderboard-container {
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: scale-in 0.4s var(--ease-out-expo);
+  overflow: hidden;
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--gold);
+  text-shadow: 0 0 15px var(--gold-glow);
+}
+
+.leaderboard-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  transition: all var(--duration-fast) var(--ease-out-expo);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.leaderboard-reward-banner {
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.02));
+  border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+  font-size: 0.75rem;
+  color: var(--gold);
+  text-align: center;
+}
+
+.leaderboard-loading,
+.leaderboard-empty {
+  padding: var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  color: var(--text-muted);
+}
+
+.leaderboard-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 215, 0, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.leaderboard-table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-sm);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.leaderboard-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.leaderboard-table th {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-table td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  white-space: nowrap;
+}
+
+.leaderboard-row {
+  transition: background var(--duration-fast);
+}
+
+.leaderboard-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Top 3 styling */
+.leaderboard-top-1 {
+  background: rgba(255, 215, 0, 0.06);
+}
+.leaderboard-top-1 .leaderboard-distance {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.leaderboard-top-2 {
+  background: rgba(192, 192, 192, 0.04);
+}
+
+.leaderboard-top-3 {
+  background: rgba(205, 127, 50, 0.04);
+}
+
+.leaderboard-current-user {
+  background: rgba(0, 255, 136, 0.08) !important;
+  border-left: 3px solid var(--neon-green);
+}
+
+.rank-medal {
+  font-size: 1.2rem;
+}
+
+.rank-number {
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+.leaderboard-handle a {
+  color: var(--neon-green);
+  font-weight: 500;
+}
+
+.leaderboard-handle .no-handle {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.leaderboard-wallet {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.leaderboard-distance {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.leaderboard-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.leaderboard-footer {
+  padding: var(--space-md) var(--space-xl);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: center;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .leaderboard-container {
+    max-height: 95vh;
+    border-radius: var(--radius-md);
+  }
+
+  .leaderboard-table {
+    font-size: 0.75rem;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  /* Hide date column on mobile */
+  .leaderboard-table th:nth-child(5),
+  .leaderboard-table td:nth-child(5) {
+    display: none;
+  }
+}

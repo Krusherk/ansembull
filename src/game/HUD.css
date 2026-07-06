@@ -1,0 +1,111 @@
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-user {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.hud-handle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--neon-green);
+  text-shadow: 0 0 10px var(--neon-green-glow);
+}
+
+.hud-wallet {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.hud-distance {
+  position: absolute;
+  top: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.hud-distance-value {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 2.2rem;
+  color: var(--neon-green);
+  text-shadow: 0 0 15px var(--neon-green-glow),
+               0 0 40px rgba(0, 255, 136, 0.15);
+  letter-spacing: 0.02em;
+}
+
+.hud-distance-unit {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.hud-speed {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.hud-speed-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.hud-speed-unit {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.hud-controls-hint {
+  position: absolute;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-lg);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+  animation: fade-in 1s ease;
+}
+
+@media (min-width: 769px) {
+  .hud-controls-hint {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hud-distance-value {
+    font-size: 1.6rem;
+  }
+
+  .hud-handle {
+    font-size: 0.75rem;
+  }
+}

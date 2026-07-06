@@ -1,0 +1,111 @@
+.gameover-screen {
+  z-index: 200;
+}
+
+.gameover-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-2xl);
+  animation: scale-in 0.4s var(--ease-out-back);
+}
+
+.gameover-title {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 4rem;
+  color: var(--neon-red);
+  text-shadow: 0 0 20px var(--neon-red-glow),
+               0 0 60px rgba(255, 51, 85, 0.2);
+  animation: shake 0.5s ease-out;
+}
+
+.gameover-distance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.gameover-distance-value {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 5rem;
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold-glow),
+               0 0 60px rgba(255, 215, 0, 0.15);
+  line-height: 1;
+}
+
+.gameover-distance-unit {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.gameover-stats {
+  display: flex;
+  gap: var(--space-2xl);
+}
+
+.gameover-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.gameover-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.gameover-stat-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.gameover-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  width: 100%;
+  max-width: 320px;
+}
+
+.gameover-actions .btn {
+  width: 100%;
+}
+
+.gameover-submitted {
+  padding: var(--space-md);
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: var(--radius-md);
+  width: 100%;
+  text-align: center;
+}
+
+.gameover-submitted-text {
+  color: var(--neon-green);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .gameover-title {
+    font-size: 2.5rem;
+  }
+
+  .gameover-distance-value {
+    font-size: 3.5rem;
+  }
+}

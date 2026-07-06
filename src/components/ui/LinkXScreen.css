@@ -1,0 +1,102 @@
+.linkx-screen {
+  background: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.linkx-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.linkx-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl) var(--space-xl);
+  max-width: 420px;
+  width: 90%;
+  animation: scale-in 0.5s var(--ease-out-expo);
+}
+
+.linkx-check-icon {
+  font-size: 2.5rem;
+  animation: scale-in 0.4s var(--ease-out-back);
+}
+
+.linkx-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: var(--neon-green);
+  text-shadow: 0 0 15px var(--neon-green-glow);
+}
+
+.linkx-wallet-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: var(--radius-full);
+}
+
+.linkx-wallet-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--neon-green);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--neon-green);
+  animation: pulse-text 2s ease-in-out infinite;
+}
+
+.linkx-wallet-addr {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--neon-green);
+}
+
+.linkx-divider {
+  width: 60px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: var(--space-sm) 0;
+}
+
+.linkx-subtitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+}
+
+.linkx-message {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+.linkx-btn {
+  margin-top: var(--space-sm);
+  min-width: 260px;
+}
+
+.x-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.linkx-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 280px;
+}
