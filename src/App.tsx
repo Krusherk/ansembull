@@ -116,7 +116,7 @@ export default function App() {
   const handleConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      await login();
+      login({ loginMethods: ['wallet'] });
     } catch (error) {
       console.error('Login error:', error);
     } finally {

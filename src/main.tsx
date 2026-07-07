@@ -9,26 +9,66 @@ import './index.css';
 
 const PRIVY_APP_ID = import.meta.env.VITE_PRIVY_APP_ID || '';
 
+// Error boundary to catch and display crashes instead of blank page
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{
+          background: '#0a0a0f', color: '#ff3355', padding: '40px',
+          fontFamily: 'monospace', height: '100vh', display: 'flex',
+          flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <h1 style={{ color: '#ff3355', marginBottom: '20px' }}>⚠️ Error</h1>
+          <pre style={{ maxWidth: '600px', whiteSpace: 'pre-wrap', color: '#888' }}>
+            {this.state.error.message}
+          </pre>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '20px', padding: '10px 24px', background: '#00ff88',
+              color: '#0a0a0f', border: 'none', borderRadius: '8px',
+              fontWeight: 'bold', cursor: 'pointer',
+            }}
+          >
+            Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <PrivyProvider
-      appId={PRIVY_APP_ID}
-      config={{
-        appearance: {
-          theme: 'dark',
-          accentColor: '#00ff88',
-          logo: '/favicon.svg',
-          showWalletLoginFirst: true,
-          walletList: ['phantom', 'solflare', 'backpack', 'metamask'],
-        },
-        loginMethods: ['wallet'],
-        embeddedWallets: {
-          createOnLogin: 'off',
-        },
-        supportedChains: [],
-      }}
-    >
-      <App />
-    </PrivyProvider>
+    <ErrorBoundary>
+      <PrivyProvider
+        appId={PRIVY_APP_ID}
+        config={{
+          appearance: {
+            theme: 'dark',
+            accentColor: '#00ff88',
+            logo: '/favicon.svg',
+            walletChainType: 'solana-only',
+            walletList: ['detected_solana_wallets', 'metamask'],
+          },
+          embeddedWallets: {
+            createOnLogin: 'off',
+          },
+        }}
+      >
+        <App />
+      </PrivyProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 );
