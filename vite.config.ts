@@ -9,14 +9,21 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      buffer: 'buffer',
+      // Buffer polyfill for Solana libs
+      buffer: 'buffer/',
     },
   },
   optimizeDeps: {
+    include: ['buffer', '@solana/web3.js'],
     esbuildOptions: {
       define: {
         global: 'globalThis',
       },
+    },
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
     },
   },
 })

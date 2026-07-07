@@ -87,7 +87,7 @@ async function submitScoreDirect(params: {
       twitter_handle: params.twitterHandle,
       distance: Math.floor(params.distance),
       play_duration_seconds: Math.floor(params.playDuration),
-    });
+    } as any);
 
   if (error) {
     return { success: false, error: error.message };

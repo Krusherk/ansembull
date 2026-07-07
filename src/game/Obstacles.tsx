@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameStore, ObstacleType, Obstacle } from '../store/gameStore';
@@ -215,16 +215,6 @@ function LiquidationSpike({ obstacle }: ObstacleMeshProps) {
 function CrashingChart({ obstacle }: ObstacleMeshProps) {
   const ref = useRef<THREE.Group>(null!);
 
-  const lineGeometry = useMemo(() => {
-    const points = [];
-    for (let i = 0; i < 8; i++) {
-      const x = (i - 3.5) * 0.4;
-      const y = 0.5 + Math.random() * 1.5;
-      points.push(new THREE.Vector3(x, y, 0));
-    }
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, []);
-
   useFrame(() => {
     if (!ref.current) return;
     ref.current.position.set(obstacle.lane * LANE_WIDTH, 0, obstacle.z);
@@ -232,9 +222,23 @@ function CrashingChart({ obstacle }: ObstacleMeshProps) {
 
   return (
     <group ref={ref}>
-      <line geometry={lineGeometry}>
-        <lineBasicMaterial color="#ff3355" linewidth={3} />
-      </line>
+      {/* Zigzag chart line built from small box segments */}
+      {Array.from({ length: 7 }).map((_, i) => {
+        const x = (i - 3) * 0.35;
+        const y = 0.5 + ((i % 2 === 0) ? 0.8 : 0.2);
+        const nextY = 0.5 + (((i + 1) % 2 === 0) ? 0.8 : 0.2);
+        const angle = Math.atan2(nextY - y, 0.35);
+        return (
+          <mesh key={i} position={[x, y, 0]} rotation={[0, 0, angle]}>
+            <boxGeometry args={[0.4, 0.08, 0.08]} />
+            <meshStandardMaterial
+              color="#ff3355"
+              emissive="#ff3355"
+              emissiveIntensity={0.8}
+            />
+          </mesh>
+        );
+      })}
       {/* Solid barrier version */}
       <mesh position={[0, 0.6, 0]}>
         <boxGeometry args={[2.5, 1.2, 0.3]} />
