@@ -4,22 +4,26 @@ import { Buffer } from 'buffer';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { PrivyProvider } from '@privy-io/react-auth';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
 import App from './App';
 import './index.css';
 
 const PRIVY_APP_ID = import.meta.env.VITE_PRIVY_APP_ID || '';
 
-// Error boundary to catch and display crashes instead of blank page
+// Solana connectors — enables Phantom, Solflare, Backpack detection on mobile
+const solanaConnectors = toSolanaWalletConnectors({
+  shouldAutoConnect: true,
+});
+
+// Error boundary
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { error: Error | null }
 > {
   state = { error: null as Error | null };
-
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
-
   render() {
     if (this.state.error) {
       return (
@@ -32,16 +36,11 @@ class ErrorBoundary extends React.Component<
           <pre style={{ maxWidth: '600px', whiteSpace: 'pre-wrap', color: '#888' }}>
             {this.state.error.message}
           </pre>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              marginTop: '20px', padding: '10px 24px', background: '#00ff88',
-              color: '#0a0a0f', border: 'none', borderRadius: '8px',
-              fontWeight: 'bold', cursor: 'pointer',
-            }}
-          >
-            Reload
-          </button>
+          <button onClick={() => window.location.reload()} style={{
+            marginTop: '20px', padding: '10px 24px', background: '#00ff88',
+            color: '#0a0a0f', border: 'none', borderRadius: '8px',
+            fontWeight: 'bold', cursor: 'pointer',
+          }}>Reload</button>
         </div>
       );
     }
@@ -60,10 +59,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             accentColor: '#00ff88',
             logo: '/favicon.svg',
             walletChainType: 'solana-only',
-            walletList: ['detected_solana_wallets', 'metamask'],
+            walletList: ['detected_solana_wallets', 'phantom', 'solflare', 'backpack'],
           },
           embeddedWallets: {
-            createOnLogin: 'off',
+            createOnLogin: 'users-without-wallets',
+          },
+          externalWallets: {
+            solana: {
+              connectors: solanaConnectors,
+            },
           },
         }}
       >
