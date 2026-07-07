@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useGameStore } from './store/gameStore';
-import { checkAnsemBalance, isHolder } from './lib/solana';
+import { checkAnsemBalance, isHolder, isGateBypassed } from './lib/solana';
 import GameCanvas from './game/GameCanvas';
 import HUD from './game/HUD';
 import LandingScreen from './components/ui/LandingScreen';
-import LinkXScreen from './components/ui/LinkXScreen';
 import HoldersOnlyScreen from './components/ui/HoldersOnlyScreen';
 import LoadingScreen from './components/ui/LoadingScreen';
 import GameOverScreen from './components/ui/GameOverScreen';
@@ -13,7 +12,6 @@ import LeaderboardScreen from './components/ui/LeaderboardScreen';
 
 type AppScreen =
   | 'landing'
-  | 'link-x'
   | 'checking'
   | 'holders-only'
   | 'ready'
@@ -28,7 +26,6 @@ export default function App() {
   const [twitterHandle, setTwitterHandle] = useState<string | null>(null);
   const [ansemBalance, setAnsemBalance] = useState<number>(0);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isLinkingX, setIsLinkingX] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Connecting...');
 
   const gameState = useGameStore(state => state.gameState);
@@ -42,29 +39,29 @@ export default function App() {
       return;
     }
 
-    // Find Solana wallet — check multiple possible shapes
     const linkedAccounts = user.linkedAccounts || [];
-    
-    const solanaWallet = linkedAccounts.find(
-      (account: any) => {
-        // Embedded wallet or external wallet with solana chain
-        if (account.type === 'wallet') {
-          return account.chainType === 'solana' || account.walletClientType === 'privy';
-        }
-        return false;
-      }
-    );
-    
-    // Also check user.wallet as fallback
-    const walletAddr = solanaWallet && 'address' in solanaWallet
-      ? (solanaWallet as any).address
-      : (user as any).wallet?.address || null;
 
-    if (walletAddr) {
-      setWalletAddress(walletAddr);
+    // Find any wallet address
+    let foundWallet: string | null = null;
+
+    // Check linked accounts for wallets
+    for (const account of linkedAccounts) {
+      if ((account as any).type === 'wallet' && (account as any).address) {
+        foundWallet = (account as any).address;
+        break;
+      }
     }
 
-    // Find Twitter account
+    // Fallback: check user.wallet
+    if (!foundWallet && (user as any).wallet?.address) {
+      foundWallet = (user as any).wallet.address;
+    }
+
+    if (foundWallet) {
+      setWalletAddress(foundWallet);
+    }
+
+    // Find Twitter account if linked
     const twitterAccount = linkedAccounts.find(
       (account: any) => account.type === 'twitter_oauth'
     );
@@ -73,38 +70,27 @@ export default function App() {
     }
   }, [user]);
 
-  // Handle auth state changes
+  // After wallet is found, check holder status
   useEffect(() => {
     if (!ready) return;
 
-    if (authenticated && walletAddress) {
-      const hasTwitter = (user?.linkedAccounts || []).some(
-        (account: any) => account.type === 'twitter_oauth'
-      );
-
-      if (screen === 'landing' || screen === 'link-x') {
-        if (hasTwitter) {
-          checkHolderStatus();
-        } else if (screen !== 'link-x') {
-          setScreen('link-x');
-        }
-      }
-    } else if (authenticated && !walletAddress) {
-      // User logged in but no wallet address found yet — might still be loading
-      // Check if any wallet exists
-      const linkedAccounts = user?.linkedAccounts || [];
-      const anyWallet = linkedAccounts.find((a: any) => a.type === 'wallet');
-      if (anyWallet && 'address' in anyWallet) {
-        setWalletAddress((anyWallet as any).address);
-      }
+    if (authenticated && walletAddress && screen === 'landing') {
+      checkHolderStatus();
     } else if (!authenticated && screen !== 'landing') {
       setScreen('landing');
     }
-  }, [ready, authenticated, walletAddress, user]);
+  }, [ready, authenticated, walletAddress]);
 
   // Check if wallet holds enough $ANSEM
   const checkHolderStatus = useCallback(async () => {
     if (!walletAddress) return;
+
+    // If gate is bypassed, go straight to ready
+    if (isGateBypassed()) {
+      setAnsemBalance(999999);
+      setScreen('ready');
+      return;
+    }
 
     setScreen('checking');
     setLoadingMessage('Checking $ANSEM balance...');
@@ -138,35 +124,6 @@ export default function App() {
     }
   }, [login]);
 
-  // Handle X linking — use login again with twitter method
-  const handleLinkX = useCallback(async () => {
-    setIsLinkingX(true);
-    try {
-      // Try to link Twitter via Privy's link method
-      // Different Privy versions expose this differently
-      const privy = (window as any).__PRIVY__;
-      if (privy?.linkAccount) {
-        await privy.linkAccount({ type: 'twitter' });
-      } else {
-        // Fallback: just proceed to holder check
-        // The user can link Twitter from Privy's UI later
-        console.log('Twitter linking not available, skipping...');
-      }
-      checkHolderStatus();
-    } catch (error) {
-      console.error('Link Twitter error:', error);
-      // Don't block the user — proceed anyway
-      checkHolderStatus();
-    } finally {
-      setIsLinkingX(false);
-    }
-  }, [checkHolderStatus]);
-
-  // Skip X linking
-  const handleSkipX = useCallback(() => {
-    checkHolderStatus();
-  }, [checkHolderStatus]);
-
   // Handle disconnect
   const handleDisconnect = useCallback(async () => {
     try {
@@ -199,12 +156,10 @@ export default function App() {
     setScreen('playing');
   }, [startGame]);
 
-  // Show leaderboard
   const handleShowLeaderboard = useCallback(() => {
     setScreen('leaderboard');
   }, []);
 
-  // Close leaderboard
   const handleCloseLeaderboard = useCallback(() => {
     if (gameState === 'gameOver') {
       setScreen('game-over');
@@ -213,34 +168,21 @@ export default function App() {
     }
   }, [gameState]);
 
-  // Render based on screen state
+  // Render
   if (!ready) {
     return <LoadingScreen message="Initializing..." />;
   }
 
   return (
     <>
-      {/* Landing screen */}
       {screen === 'landing' && (
         <LandingScreen onConnect={handleConnect} isConnecting={isConnecting} />
       )}
 
-      {/* Link X screen */}
-      {screen === 'link-x' && walletAddress && (
-        <LinkXScreen
-          walletAddress={walletAddress}
-          onLinkX={handleLinkX}
-          onSkip={handleSkipX}
-          isLinking={isLinkingX}
-        />
-      )}
-
-      {/* Loading / checking */}
       {screen === 'checking' && (
         <LoadingScreen message={loadingMessage} />
       )}
 
-      {/* Holders only */}
       {screen === 'holders-only' && (
         <HoldersOnlyScreen
           balance={ansemBalance}
@@ -248,7 +190,6 @@ export default function App() {
         />
       )}
 
-      {/* Ready to play */}
       {screen === 'ready' && (
         <div className="screen ready-screen">
           <div className="ready-content">
@@ -260,9 +201,11 @@ export default function App() {
               </p>
             )}
 
-            <p className="ready-balance">
-              Balance: <span className="highlight-green">{ansemBalance.toLocaleString()} $ANSEM</span>
-            </p>
+            {walletAddress && (
+              <p className="ready-handle" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </p>
+            )}
 
             <button
               className="btn btn-primary btn-lg"
@@ -290,7 +233,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Game canvas (always mounted when playing or game over for background) */}
       {(screen === 'playing' || screen === 'game-over' || screen === 'leaderboard') && (
         <>
           <GameCanvas />
@@ -298,7 +240,6 @@ export default function App() {
         </>
       )}
 
-      {/* Game over overlay */}
       {screen === 'game-over' && (
         <GameOverScreen
           twitterHandle={twitterHandle}
@@ -308,7 +249,6 @@ export default function App() {
         />
       )}
 
-      {/* Leaderboard overlay */}
       {screen === 'leaderboard' && (
         <LeaderboardScreen
           currentWallet={walletAddress}

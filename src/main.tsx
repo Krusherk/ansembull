@@ -14,16 +14,18 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <PrivyProvider
       appId={PRIVY_APP_ID}
       config={{
-        loginMethods: ['wallet', 'twitter'],
         appearance: {
           theme: 'dark',
           accentColor: '#00ff88',
           logo: '/favicon.svg',
           showWalletLoginFirst: true,
+          walletList: ['phantom', 'solflare', 'backpack', 'metamask'],
         },
+        loginMethods: ['wallet'],
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          createOnLogin: 'off',
         },
+        supportedChains: [],
       }}
     >
       <App />

@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_SOLANA_RPC_URL: string
   readonly VITE_ANSEM_MINT: string
   readonly VITE_MIN_ANSEM_BALANCE: string
+  readonly VITE_SKIP_TOKEN_GATE: string
 }
 
 interface ImportMeta {

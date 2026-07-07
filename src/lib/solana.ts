@@ -3,7 +3,8 @@ import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const ANSEM_MINT = import.meta.env.VITE_ANSEM_MINT || '9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump';
-const MIN_BALANCE = parseInt(import.meta.env.VITE_MIN_ANSEM_BALANCE || '10000', 10);
+const MIN_BALANCE = parseFloat(import.meta.env.VITE_MIN_ANSEM_BALANCE || '0.1');
+const SKIP_TOKEN_GATE = import.meta.env.VITE_SKIP_TOKEN_GATE === 'true';
 
 let connectionInstance: Connection | null = null;
 
@@ -15,6 +16,8 @@ export function getConnection(): Connection {
 }
 
 export async function checkAnsemBalance(walletAddress: string): Promise<number> {
+  if (SKIP_TOKEN_GATE) return 999999;
+
   try {
     const connection = getConnection();
     const owner = new PublicKey(walletAddress);
@@ -24,7 +27,6 @@ export async function checkAnsemBalance(walletAddress: string): Promise<number> 
     const balance = await connection.getTokenAccountBalance(ata);
     return balance.value.uiAmount || 0;
   } catch (error: any) {
-    // If the token account doesn't exist, the user holds 0 tokens
     if (
       error?.message?.includes('could not find account') ||
       error?.message?.includes('Invalid param') ||
@@ -33,11 +35,13 @@ export async function checkAnsemBalance(walletAddress: string): Promise<number> 
       return 0;
     }
     console.error('Error checking $ANSEM balance:', error);
-    throw error;
+    return 0;
   }
 }
 
 export async function isHolder(walletAddress: string): Promise<boolean> {
+  if (SKIP_TOKEN_GATE) return true;
+  if (MIN_BALANCE <= 0) return true;
   const balance = await checkAnsemBalance(walletAddress);
   return balance >= MIN_BALANCE;
 }
@@ -46,6 +50,6 @@ export function getMinBalance(): number {
   return MIN_BALANCE;
 }
 
-export function getAnsemMint(): string {
-  return ANSEM_MINT;
+export function isGateBypassed(): boolean {
+  return SKIP_TOKEN_GATE;
 }
