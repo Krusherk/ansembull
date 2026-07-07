@@ -4,34 +4,136 @@
   z-index: 50;
   pointer-events: none;
   padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
 }
 
-.hud-user {
+/* Profile area — top left */
+.hud-profile-area {
   position: absolute;
   top: var(--space-md);
   left: var(--space-md);
+  pointer-events: all;
+  z-index: 60;
+}
+
+.hud-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 10px 4px 4px;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.hud-profile-btn:hover {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 12px var(--neon-green-glow);
+}
+
+.hud-pfp {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--neon-green);
+}
+
+.hud-pfp-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neon-green), #006644);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--bg-primary);
+}
+
+.hud-profile-chevron {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+}
+
+.hud-profile-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: var(--space-xs);
+  background: rgba(10, 10, 15, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  min-width: 180px;
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
+  animation: scale-in 0.15s var(--ease-out-expo);
+  backdrop-filter: blur(20px);
 }
 
-.hud-handle {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.85rem;
+.hud-profile-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+}
+
+.hud-profile-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.hud-profile-value {
   color: var(--neon-green);
-  text-shadow: 0 0 10px var(--neon-green-glow);
-}
-
-.hud-wallet {
-  font-family: var(--font-body);
+  font-family: monospace;
   font-size: 0.7rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.05em;
 }
 
+.hud-profile-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.hud-link-x {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hud-link-x:hover {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--neon-green);
+}
+
+.hud-disconnect {
+  color: var(--neon-red);
+}
+
+.hud-disconnect:hover {
+  background: rgba(255, 51, 85, 0.1);
+}
+
+.x-icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+/* Distance — top center */
 .hud-distance {
   position: absolute;
   top: var(--space-md);
@@ -40,6 +142,7 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-xs);
+  pointer-events: none;
 }
 
 .hud-distance-value {
@@ -59,10 +162,18 @@
   color: var(--text-secondary);
 }
 
-.hud-speed {
+/* Stats — top right */
+.hud-stats-right {
   position: absolute;
   top: var(--space-md);
   right: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.hud-speed {
   display: flex;
   align-items: baseline;
   gap: 2px;
@@ -81,6 +192,27 @@
   color: var(--text-muted);
 }
 
+.hud-difficulty {
+  display: flex;
+}
+
+.hud-diff-badge {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.diff-0 { background: rgba(0, 255, 136, 0.15); color: var(--neon-green); }
+.diff-1 { background: rgba(255, 215, 0, 0.15); color: var(--gold); }
+.diff-2 { background: rgba(255, 165, 0, 0.15); color: #ffa500; }
+.diff-3 { background: rgba(255, 51, 85, 0.15); color: var(--neon-red); }
+.diff-4 { background: rgba(255, 51, 85, 0.25); color: #ff6688; text-shadow: 0 0 8px var(--neon-red-glow); }
+
+/* Controls hint */
 .hud-controls-hint {
   position: absolute;
   bottom: var(--space-lg);
@@ -92,20 +224,13 @@
   color: var(--text-muted);
   opacity: 0.5;
   animation: fade-in 1s ease;
+  pointer-events: none;
 }
 
 @media (min-width: 769px) {
-  .hud-controls-hint {
-    display: none;
-  }
+  .hud-controls-hint { display: none; }
 }
 
 @media (max-width: 768px) {
-  .hud-distance-value {
-    font-size: 1.6rem;
-  }
-
-  .hud-handle {
-    font-size: 0.75rem;
-  }
+  .hud-distance-value { font-size: 1.6rem; }
 }

@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export type GameState = 'idle' | 'playing' | 'gameOver';
 export type Lane = -1 | 0 | 1;
 
-export type ObstacleType = 'redCandle' | 'bearTrap' | 'fudCloud' | 'liquidationSpike' | 'crashingChart';
+export type ObstacleType = 'redCandle' | 'bearTrap' | 'fudCloud' | 'liquidationSpike' | 'crashingChart' | 'pumpFun';
 
 export interface Obstacle {
   id: number;
@@ -15,7 +15,6 @@ export interface Obstacle {
 }
 
 interface GameStore {
-  // State
   gameState: GameState;
   distance: number;
   speed: number;
@@ -31,8 +30,8 @@ interface GameStore {
   lastSpawnDistance: number;
   nearMissCount: number;
   screenShake: boolean;
+  difficultyLevel: number;
 
-  // Actions
   startGame: () => void;
   endGame: () => void;
   switchLane: (direction: -1 | 1) => void;
@@ -45,16 +44,15 @@ interface GameStore {
 }
 
 const INITIAL_SPEED = 18;
-const MAX_SPEED = 45;
-const SPEED_INCREMENT = 0.3; // per 100m
+const MAX_SPEED = 50;
+const SPEED_INCREMENT = 0.4; // per 100m — faster ramp
 const LANE_WIDTH_VALUE = 3.5;
 const JUMP_DURATION = 0.55;
 const SLIDE_DURATION = 0.45;
-const MIN_SPAWN_GAP = 20;
-const INITIAL_SPAWN_INTERVAL = 35;
+const MIN_SPAWN_GAP = 14; // tighter at high difficulty
+const INITIAL_SPAWN_INTERVAL = 30;
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  // Initial state
   gameState: 'idle',
   distance: 0,
   speed: INITIAL_SPEED,
@@ -70,6 +68,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastSpawnDistance: 0,
   nearMissCount: 0,
   screenShake: false,
+  difficultyLevel: 0,
 
   startGame: () => {
     set({
@@ -88,6 +87,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastSpawnDistance: 0,
       nearMissCount: 0,
       screenShake: false,
+      difficultyLevel: 0,
     });
   },
 
@@ -120,10 +120,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const state = get();
     if (state.gameState !== 'playing') return;
 
-    // Update distance and speed
     const newDistance = state.distance + state.speed * delta;
     const speedLevel = Math.floor(newDistance / 100);
     const newSpeed = Math.min(INITIAL_SPEED + speedLevel * SPEED_INCREMENT, MAX_SPEED);
+
+    // Difficulty level increases every 500m
+    const newDifficulty = Math.floor(newDistance / 500);
 
     // Update jump
     let isJumping = state.isJumping;
@@ -147,15 +149,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Smooth lane transition
-    const laneX = state.targetLane * LANE_WIDTH_VALUE;
-    const currentLaneSmooth = state.currentLane * LANE_WIDTH_VALUE;
-    const diff = laneX - currentLaneSmooth;
+    // Lane transition
     let newCurrentLane = state.targetLane;
-    if (Math.abs(diff) > 0.01) {
-      // Keep currentLane as target while transitioning (visual handled in Player)
-      newCurrentLane = state.targetLane;
-    }
 
     // Move obstacles
     const moveAmount = state.speed * delta;
@@ -164,17 +159,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...obs,
         z: obs.z - moveAmount,
       }))
-      .filter(obs => obs.z > -15); // Remove obstacles that passed
+      .filter(obs => obs.z > -15);
 
-    // Spawn new obstacles
+    // Spawn new obstacles with difficulty scaling
     const spawnInterval = Math.max(
       MIN_SPAWN_GAP,
-      INITIAL_SPAWN_INTERVAL - speedLevel * 0.5
+      INITIAL_SPAWN_INTERVAL - speedLevel * 0.6 - newDifficulty * 1.5
     );
     let lastSpawnDist = state.lastSpawnDistance;
     let nextId = state.nextObstacleId;
     if (newDistance - lastSpawnDist >= spawnInterval) {
-      const types: ObstacleType[] = ['redCandle', 'bearTrap', 'fudCloud', 'liquidationSpike', 'crashingChart'];
+      const types: ObstacleType[] = ['redCandle', 'bearTrap', 'fudCloud', 'liquidationSpike', 'crashingChart', 'pumpFun'];
       const type = types[Math.floor(Math.random() * types.length)];
       const lanes: Lane[] = [-1, 0, 1];
       const lane = lanes[Math.floor(Math.random() * lanes.length)];
@@ -188,8 +183,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         nearMissTriggered: false,
       });
 
-      // Sometimes spawn a second obstacle in a different lane for difficulty
-      if (newSpeed > 25 && Math.random() > 0.5) {
+      // At higher difficulty, spawn more obstacles per wave
+      const multiObstacleChance = Math.min(0.8, 0.3 + newDifficulty * 0.1);
+      if (Math.random() < multiObstacleChance) {
         const otherLanes = lanes.filter(l => l !== lane);
         const secondLane = otherLanes[Math.floor(Math.random() * otherLanes.length)];
         const secondType = types[Math.floor(Math.random() * types.length)];
@@ -198,6 +194,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
           type: secondType,
           lane: secondLane,
           z: 100 + Math.random() * 20,
+          passed: false,
+          nearMissTriggered: false,
+        });
+        nextId++;
+      }
+
+      // At very high difficulty (2000m+), sometimes triple obstacles
+      if (newDifficulty >= 4 && Math.random() < 0.3) {
+        const thirdLane = lanes[Math.floor(Math.random() * lanes.length)];
+        const thirdType = types[Math.floor(Math.random() * types.length)];
+        updatedObstacles.push({
+          id: nextId + 1,
+          type: thirdType,
+          lane: thirdLane,
+          z: 110 + Math.random() * 15,
           passed: false,
           nearMissTriggered: false,
         });
@@ -219,12 +230,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       obstacles: updatedObstacles,
       lastSpawnDistance: lastSpawnDist,
       nextObstacleId: nextId,
+      difficultyLevel: newDifficulty,
     });
   },
 
-  spawnObstacle: () => {
-    // Manual spawn (handled in tick now)
-  },
+  spawnObstacle: () => {},
 
   setScreenShake: (shake: boolean) => {
     set({ screenShake: shake });
@@ -247,6 +257,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastSpawnDistance: 0,
       nearMissCount: 0,
       screenShake: false,
+      difficultyLevel: 0,
     });
   },
 }));

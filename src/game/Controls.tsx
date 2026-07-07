@@ -6,7 +6,6 @@ export default function Controls() {
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   useEffect(() => {
-    // Keyboard controls
     const handleKeyDown = (e: KeyboardEvent) => {
       const state = useGameStore.getState();
 
@@ -24,13 +23,14 @@ export default function Controls() {
         case 'ArrowLeft':
         case 'KeyA':
           e.preventDefault();
-          state.switchLane(-1);
+          // Camera behind player: left on screen = positive lane direction
+          state.switchLane(1);
           soundManager.playSwitchLane();
           break;
         case 'ArrowRight':
         case 'KeyD':
           e.preventDefault();
-          state.switchLane(1);
+          state.switchLane(-1);
           soundManager.playSwitchLane();
           break;
         case 'Space':
@@ -49,7 +49,6 @@ export default function Controls() {
       }
     };
 
-    // Touch controls
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
       touchStartRef.current = {
@@ -69,7 +68,6 @@ export default function Controls() {
 
       const state = useGameStore.getState();
 
-      // Tap detection (no significant movement)
       if (Math.abs(dx) < 20 && Math.abs(dy) < 20 && dt < 300) {
         if (state.gameState === 'idle') {
           state.startGame();
@@ -85,27 +83,23 @@ export default function Controls() {
 
       const minSwipe = 30;
 
-      // Determine swipe direction
       if (Math.abs(dx) > Math.abs(dy)) {
-        // Horizontal swipe
         if (Math.abs(dx) >= minSwipe) {
+          // Swipe right on screen = lane left (inverted due to camera behind)
           if (dx > 0) {
-            state.switchLane(1);
+            state.switchLane(-1);
             soundManager.playSwitchLane();
           } else {
-            state.switchLane(-1);
+            state.switchLane(1);
             soundManager.playSwitchLane();
           }
         }
       } else {
-        // Vertical swipe
         if (Math.abs(dy) >= minSwipe) {
           if (dy < 0) {
-            // Swipe up = jump
             state.jump();
             soundManager.playJump();
           } else {
-            // Swipe down = slide
             state.slide();
             soundManager.playSlide();
           }
@@ -126,5 +120,5 @@ export default function Controls() {
     };
   }, []);
 
-  return null; // No visual component
+  return null;
 }

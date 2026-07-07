@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameStore } from '../store/gameStore';
@@ -18,6 +18,7 @@ const OBSTACLE_HITBOXES: Record<string, { w: number; h: number; d: number; yOffs
   fudCloud:         { w: 2.0, h: 2.0, d: 2.0, yOffset: 3.0 },
   liquidationSpike: { w: 1.2, h: 2.8, d: 1.2, yOffset: 1.4 },
   crashingChart:    { w: 2.2, h: 1.0, d: 0.4, yOffset: 0.6 },
+  pumpFun:          { w: 1.6, h: 3.0, d: 0.8, yOffset: 1.5 },
 };
 
 const playerBox = new THREE.Box3();

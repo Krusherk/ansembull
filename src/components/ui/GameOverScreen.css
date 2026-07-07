@@ -72,6 +72,32 @@
   color: var(--text-primary);
 }
 
+.gameover-submit-status {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.status-submitting {
+  color: var(--text-secondary);
+}
+
+.status-submitted {
+  color: var(--neon-green);
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+}
+
+.status-error {
+  color: var(--neon-red);
+  background: rgba(255, 51, 85, 0.08);
+  border: 1px solid rgba(255, 51, 85, 0.15);
+}
+
 .gameover-actions {
   display: flex;
   flex-direction: column;
@@ -84,20 +110,6 @@
 
 .gameover-actions .btn {
   width: 100%;
-}
-
-.gameover-submitted {
-  padding: var(--space-md);
-  background: rgba(0, 255, 136, 0.1);
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  border-radius: var(--radius-md);
-  width: 100%;
-  text-align: center;
-}
-
-.gameover-submitted-text {
-  color: var(--neon-green);
-  font-weight: 600;
 }
 
 @media (max-width: 768px) {
